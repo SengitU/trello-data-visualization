@@ -1,3 +1,5 @@
+import { getColorCode } from './color-mapping';
+
 const extractLabels = (tasks) => {
   const uniqueLabels = {};
   tasks.forEach(({labels}) => {
@@ -5,14 +7,10 @@ const extractLabels = (tasks) => {
       const { name, id } = label;
       let { color } = label;
       if (!uniqueLabels[id]) {
-        //TODO: Will be mapped with color codes. This part will be abstracted.
-        if (color === 'sky') {
-          color = 'skyblue';
-        }
         uniqueLabels[id] = {
           name,
-          color,
           id,
+          color: getColorCode(color),
           count: 1
         }
       } else {
