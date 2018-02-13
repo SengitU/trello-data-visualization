@@ -14,7 +14,7 @@ export const listNames = {
 }
 
 // Consider adding local cache here
-export const getListId = (data, name) => {
-  const list = data.lists.find(list => list.name === name);
+export const getListId = ({lists}, name) => {
+  const list = lists.find(list => list.name === name);
   return list && list.id;
 }

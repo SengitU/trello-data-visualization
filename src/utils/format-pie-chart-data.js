@@ -1,7 +1,7 @@
 const extractLabels = (tasks) => {
   const uniqueLabels = {};
-  tasks.forEach(task => {
-    task.labels.forEach(label => {
+  tasks.forEach(({labels}) => {
+    labels.forEach(label => {
       const { name, id } = label;
       let { color } = label;
       if (!uniqueLabels[id]) {
@@ -33,12 +33,10 @@ export const formatPieChartData = (completedTasks) => {
     }]
   };
 
-  Object.values(labels).forEach(label => {
-    formatted.labels.push(label.name);
-    formatted.datasets[0].data.push(label.count);
-    formatted.datasets[0].backgroundColor.push(label.color);
+  Object.values(labels).forEach(({name, count, color}) => {
+    formatted.labels.push(name);
+    formatted.datasets[0].data.push(count);
+    formatted.datasets[0].backgroundColor.push(color);
   });
-
-  console.log(formatted)
   return formatted;
 }

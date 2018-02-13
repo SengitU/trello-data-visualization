@@ -1,7 +1,7 @@
 import { getListId, listNames } from '../board-information/lists';
 
-const filterTasks = (data, listId) => {
-  return data.cards.filter(card => card.idList === listId);
+const filterTasks = ({cards}, listId) => {
+  return cards.filter(card => card.idList === listId);
 }
 
 export const filterWeeklyCompletedTasks = (data) => {
