@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PieChart from './components/chart';
 import './App.css';
 
-import { filterOverallCompletedTasks } from './services/filter-tasks'
+import { filterOverallCompletedTasks, filterWeeklyCompletedTasks } from './services/filter-tasks'
 
 const URL_TO_BOARD = `https://trello.com/b/KlLdup7o.json`;
 
