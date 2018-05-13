@@ -13,8 +13,11 @@ export default class PieChart extends PureComponent {
         {completedTasks &&
           chartData && (
             <Bar
-              data={chartData}
+              data={{ ...chartData, title: "Categories" }}
               options={{
+                legend: {
+                  display: false
+                },
                 scales: {
                   yAxes: [
                     {
