@@ -4,6 +4,7 @@ import './App.css';
 
 import { filterOverallCompletedTasks, filterWeeklyCompletedTasks } from './services/filter-tasks'
 import { getDoneGithubIssues } from './services/gh-projects';
+import { weightTasks } from './services/weight-tasks';
 
 const URL_TO_BOARD = `https://trello.com/b/KlLdup7o.json`;
 
@@ -44,8 +45,18 @@ class App extends Component {
     }
   }
 
-  calculateTasks() {            
-    return filterOverallCompletedTasks(this.state.data);
+  isTaskWeightingEnabled() {
+    const queryParameters = new URLSearchParams(window.location.search);
+    return queryParameters.get('weightTasks') === 'true';    
+  }
+
+  calculateTasks() {
+    const filteredTasks = filterOverallCompletedTasks(this.state.data);
+    if (this.isTaskWeightingEnabled()) {
+      return weightTasks(filteredTasks);
+    } else {
+      return filteredTasks;
+    }    
   }
 
   render() {
