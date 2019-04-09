@@ -3,6 +3,7 @@ import PieChart from './components/chart';
 import './App.css';
 
 import { filterOverallCompletedTasks, filterWeeklyCompletedTasks } from './services/filter-tasks'
+import { getDoneGithubIssues } from './services/gh-projects';
 
 const URL_TO_BOARD = `https://trello.com/b/KlLdup7o.json`;
 
@@ -15,12 +16,35 @@ class App extends Component {
   }
 
   componentDidMount() {
-    fetch(URL_TO_BOARD).then(response => response.json()).then(json => {
-      this.setState({ ...this.state, data: json })
+    this.fetchTasks();
+  }
+
+  fetchTasksFromTrello() {
+    fetch(URL_TO_BOARD).then(response => response.json()).then(json => {      
+      this.setState({ ...this.state, data: json });
     })
   }
-  
-  calculateTasks() {
+
+  fetchTasksFromGithubProjects() {
+    getDoneGithubIssues().then(doneIssues => {
+      this.setState({ ...this.state, data: doneIssues });
+    })    
+  }
+
+  useGithubProjectsBoard() {
+    const queryParameters = new URLSearchParams(window.location.search);
+    return queryParameters.get('boardType') === 'githubProjects';    
+  }
+
+  fetchTasks() {
+    if (this.useGithubProjectsBoard()) {
+      this.fetchTasksFromGithubProjects();
+    } else {      
+      this.fetchTasksFromTrello();
+    }
+  }
+
+  calculateTasks() {            
     return filterOverallCompletedTasks(this.state.data);
   }
 
