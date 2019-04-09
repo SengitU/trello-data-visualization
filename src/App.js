@@ -59,11 +59,19 @@ class App extends Component {
     }    
   }
 
+  getBoardType() {
+    if (this.useGithubProjectsBoard()) {
+      return "Github Projects";
+    } else {
+      return "Trello";
+    }
+  }
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <h1 className="App-title">Data Visualisation Over Trello Board</h1>
+          <h1 className="App-title">Data Visualisation Over {this.getBoardType()} Board</h1>
         </header>
         {
           this.state.data && <PieChart completedTasks={this.calculateTasks()} />
