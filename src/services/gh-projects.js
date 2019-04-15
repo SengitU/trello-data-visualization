@@ -1,5 +1,5 @@
 import { listNames } from '../board-information/lists';
-
+import GitHub from 'github-api';
 
 const labelColors = {
     'tdd': 'sky',
@@ -28,10 +28,14 @@ const createAuthorizedHttpHeader = () => {
 };
 
 const fetchAllIssues = () => {
-    const headers = createAuthorizedHttpHeader();
-    const issuesUrl = `${getGithubApiUrl()}/repos/mheilig/apprenticeship/issues`;
-    return fetch(issuesUrl, { headers })        
-      .then(response => response.json());
+    const credentials = {
+        username: process.env.REACT_APP_GITHUB_USERNAME,
+        token: process.env.REACT_APP_GITHUB_TOKEN
+    };
+    const gh = new GitHub(credentials, process.env.REACT_APP_GITHUB_API_URL);
+    return gh.getIssues(process.env.REACT_APP_GITHUB_USERNAME, 'apprenticeship')
+        .listIssues()
+        .then(response => response.data);
 };
 
 const fetchDoneCards = () => {
@@ -80,12 +84,12 @@ export const getDoneIssues = (issues, cards) => {
     return issues.filter(issue => issue.labels && issue.labels.length > 0 && doneIssueIds.includes(issue.number));
 };
 
-export const getDoneGithubIssues = () => {
-    return Promise.all([fetchAllIssues(), fetchDoneCards()])
-    .then((values) => {
-        const allIssues = values[0];        
-        const doneCards = values[1];        
-        const doneIssues = getDoneIssues(allIssues, doneCards);        
-        return convertIssuesToTrelloModel(doneIssues);
-    });
+export const getDoneGithubIssues = (allIssueFetcher = fetchAllIssues, doneCardsFetcher = fetchDoneCards) => {
+    return Promise.all([allIssueFetcher(), doneCardsFetcher()])
+        .then((values) => {
+            const allIssues = values[0];
+            const doneCards = values[1];
+            const doneIssues = getDoneIssues(allIssues, doneCards);
+            return convertIssuesToTrelloModel(doneIssues);
+        });
 };

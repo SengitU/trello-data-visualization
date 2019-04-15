@@ -1,4 +1,5 @@
-import { getDoneIssues, extractIssueNumber, fetchAllIssues } from './gh-projects';
+import { getDoneIssues, extractIssueNumber, getDoneGithubIssues } from './gh-projects';
+import { listNames } from '../board-information/lists';
 
 describe('github projects', () => {
     test('it should return all issues with status "done"', () => {
@@ -58,5 +59,55 @@ describe('github projects', () => {
         };
         expect(extractIssueNumber(card)).toBe(17);
     })
+
+    test('it should return all issues from column "Done" which have at least one label', () => {
+        const issueFetcher = () => {
+            return Promise.resolve([
+                { number: 1, name: 'Issue #1', labels: [] },
+                { number: 2, name: 'Issue #2', labels: [{ name: 'tdd', id: 12 }] },
+                { number: 3, name: 'Issue #3', labels: [{ name: 'agile-methods', id: 15 }] },
+                { number: 4, name: 'Issue #4', labels: [{ name: 'communication', id: 20 }] },
+            ]);
+        };
+        const doneCardFetcher = () => {
+            return Promise.resolve([
+                { content_url: 'https://github.com/api/v3/repos/mheilig/apprenticeship/issues/1' },
+                { content_url: 'https://github.com/api/v3/repos/mheilig/apprenticeship/issues/2' },
+                { content_url: 'https://github.com/api/v3/repos/mheilig/apprenticeship/issues/3' },
+            ]);
+        };
+
+        process.env.REACT_APP_GITHUB_ID_DONE_COLUMN = 123;
+
+        expect.assertions(1);
+        getDoneGithubIssues(issueFetcher, doneCardFetcher)
+            .then(issuesInTrelloFormat => {
+                expect(issuesInTrelloFormat).toEqual({
+                    lists: [
+                        {
+                            name: listNames.DONE_OVERALL,
+                            id: process.env.REACT_APP_GITHUB_ID_DONE_COLUMN
+                        }
+                    ],
+                    cards: [
+                        {
+                            idList: process.env.REACT_APP_GITHUB_ID_DONE_COLUMN,
+                            labels: [{
+                                color: "sky",
+                                id: 12,
+                                name: "tdd",
+                            }]
+                        },
+                        {
+                            idList: process.env.REACT_APP_GITHUB_ID_DONE_COLUMN,
+                            labels: [{
+                                color: "orange",
+                                id: 15,
+                                name: "agile-methods",
+                            }]
+                        },
+                    ]
+                });
+            });
+    })
 });
-  
