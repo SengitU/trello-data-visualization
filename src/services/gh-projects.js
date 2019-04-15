@@ -1,6 +1,12 @@
 import { listNames } from '../board-information/lists';
 import GitHub from 'github-api';
 
+const githubCredentials = {
+    username: process.env.REACT_APP_GITHUB_USERNAME,
+    token: process.env.REACT_APP_GITHUB_TOKEN
+};
+const githubClient = new GitHub(githubCredentials, process.env.REACT_APP_GITHUB_API_URL);
+
 const labelColors = {
     'tdd': 'sky',
     'softwaredesign': 'blue',
@@ -11,48 +17,22 @@ const labelColors = {
     'organizational stuff': 'yellow',
 };
 
-const getDoneColumnId = () => {
-    return process.env.REACT_APP_GITHUB_ID_DONE_COLUMN;
-};
-
-const getGithubApiUrl = () => {
-    return process.env.REACT_APP_GITHUB_API_URL;
-};
-
-const createAuthorizedHttpHeader = () => {
-    const username = process.env.REACT_APP_GITHUB_USERNAME;
-    const token = process.env.REACT_APP_GITHUB_TOKEN;   
-    const headers = new Headers();
-    headers.append('Authorization', 'Basic ' + btoa(username + ":" + token));    
-    return headers;
-};
-
 const fetchAllIssues = () => {
-    const credentials = {
-        username: process.env.REACT_APP_GITHUB_USERNAME,
-        token: process.env.REACT_APP_GITHUB_TOKEN
-    };
-    const gh = new GitHub(credentials, process.env.REACT_APP_GITHUB_API_URL);
-    return gh.getIssues(process.env.REACT_APP_GITHUB_USERNAME, 'apprenticeship')
+    return githubClient
+        .getIssues(process.env.REACT_APP_GITHUB_USERNAME, process.env.REACT_APP_GITHUB_REPO_NAME)
         .listIssues()
         .then(response => response.data);
 };
 
 const fetchDoneCards = () => {
-    const headers = createAuthorizedHttpHeader();
-
-    // The Projects API is currently available for developers to preview.    
-    // To access the API during the preview period, we have provide a custom media type in the Accept header.
-    //  - for more information visit https://developer.github.com/v3/projects/
-    headers.append('Accept', 'application/vnd.github.inertia-preview+json');
-
-    const cardsUrl = `${getGithubApiUrl()}/projects/columns/${getDoneColumnId()}/cards`;
-    return fetch(cardsUrl, { headers })
-      .then(response => response.json());    
+    return githubClient
+        .getProject(process.env.REACT_APP_GITHUB_ID_PROJECT)
+        .listColumnCards(process.env.REACT_APP_GITHUB_ID_DONE_COLUMN)
+        .then(response => response.data);
 };
 
-const convertIssuesToTrelloModel = (issues) => {    
-    const idDoneColumn = getDoneColumnId();
+const convertIssuesToTrelloModel = (issues) => {
+    const idDoneColumn = process.env.REACT_APP_GITHUB_ID_DONE_COLUMN;
 
     const lists = [{
         name: listNames.DONE_OVERALL,
@@ -65,17 +45,17 @@ const convertIssuesToTrelloModel = (issues) => {
                 color: labelColors[label.name],
                 id: label.id,
                 name: label.name
-            };                
+            };
         });
         return {
             idList: idDoneColumn, labels: labels
         }
     });
 
-    return { lists, cards }; 
+    return { lists, cards };
 };
 
-export const extractIssueNumber = (card) => {    
+export const extractIssueNumber = (card) => {
     return +card.content_url.match(/\d+$/)[0];
 };
 
