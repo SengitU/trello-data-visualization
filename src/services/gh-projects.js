@@ -67,8 +67,7 @@ export const getDoneIssues = (issues, cards) => {
 export const getDoneGithubIssues = (allIssueFetcher = fetchAllIssues, doneCardsFetcher = fetchDoneCards) => {
     return Promise.all([allIssueFetcher(), doneCardsFetcher()])
         .then((values) => {
-            const allIssues = values[0];
-            const doneCards = values[1];
+            const [allIssues, doneCards] = values;
             const doneIssues = getDoneIssues(allIssues, doneCards);
             return convertIssuesToTrelloModel(doneIssues);
         });
